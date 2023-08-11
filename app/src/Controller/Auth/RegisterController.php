@@ -2,56 +2,41 @@
 
 namespace App\Controller\Auth;
 
-use App\Entity\User;
-use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use App\Controller\BaseController;
+use App\Service\User\UserService;
+use App\Validation\Validator;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
-use function Symfony\Component\DependencyInjection\Loader\Configurator\inline_service;
+use App\DTO\UserDTO;
 
-final class RegisterController extends AbstractController
+final class RegisterController extends BaseController
 {
-    private EntityManagerInterface $entityManager;
+    private UserService $userService;
 
-    public function __construct(EntityManagerInterface $entityManager)
+    public function __construct(UserService $userService)
     {
-        $this->entityManager = $entityManager;
+        $this->userService = $userService;
     }
 
-    #[Route('/api/register', name: 'auth_register')]
+    #[Route('/api/register', name: 'auth_register', methods: 'POST')]
     public function register(
         Request $request,
-        UserPasswordHasherInterface $passwordHasher,
         ValidatorInterface $validator
     ): JsonResponse {
         {
-            $parameters = json_decode($request->getContent(), true);
-
-            $user = new User();
-            $password = $parameters['password'];
-            $username = $parameters['username'];
-
-            $user->setUsername($username);
-            $user->setPassword($passwordHasher->hashPassword($user, $password));
-
-            $errors = $validator->validate($user);
-
-            if (count($errors) > 0) {
-                return $this->json([
-                    'errors' => $errors,
-                ], 401);
+            try {
+                $userDTO = UserDTO::createFromRequest($request);
+                Validator::handle($validator, $userDTO);
+                $user = $this->userService->create($userDTO);
+                return $this->json(
+                    $user
+                );
+            } catch (\Exception $exception) {
+                return $this->jsonError($exception);
             }
-
-            $this->entityManager->persist($user);
-            $this->entityManager->flush();
-
-            return $this->json([
-                $user
-            ]);
         }
     }
 }
