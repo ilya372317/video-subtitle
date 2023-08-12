@@ -7,7 +7,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 
 class BaseController extends AbstractController
 {
-    protected function jsonError(\Exception $exception): JsonResponse
+    protected function jsonException(\Exception $exception): JsonResponse
     {
         return $this->json([
             'code' => $exception->getCode(),

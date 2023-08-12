@@ -35,7 +35,7 @@ final class RegisterController extends BaseController
                     $user
                 );
             } catch (\Exception $exception) {
-                return $this->jsonError($exception);
+                return $this->jsonException($exception);
             }
         }
     }
