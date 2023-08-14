@@ -3,22 +3,26 @@
 namespace App\Controller\Subtitle;
 
 use App\Controller\BaseController;
+use App\Service\Subtitle\VideoSubtitleService;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 
-#[Route(path: '/api/subtitle', name:'subtitle_')]
+#[Route(path: '/api/subtitle', name: 'subtitle_')]
 class VideoSubtitleController extends BaseController
 {
     public function __construct(
         private VideoSubtitleService $videoSubtitleService
-    )
-    {
+    ) {
     }
 
     #[Route(path: '/upload-video', name: 'upload_raw_video', methods: 'POST')]
-    public function uploadVideo(): JsonResponse
+    public function uploadVideo(Request $request): JsonResponse
     {
+        $video = $request->files->get('video');
+
         try {
+            $video = $this->videoSubtitleService->uploadVideo();
             return $this->json([]);
         } catch (\Exception $exception) {
             return $this->jsonException($exception);

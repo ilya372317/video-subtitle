@@ -15,6 +15,8 @@ RUN apt-get update && apt-get install -y zlib1g-dev g++ git libicu-dev zip libzi
     && useradd -l -u ${PUID} -g subtitle -m subtitle -G www-data \
     && usermod -p "*" subtitle -s /bin/bash
 
+RUN apt-get install -y ffmpeg
+
 WORKDIR /var/www/project
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 RUN curl -sS https://get.symfony.com/cli/installer | bash

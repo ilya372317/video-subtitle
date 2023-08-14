@@ -36,5 +36,4 @@ class UserResponse
     {
         return $this->username;
     }
-
 }
